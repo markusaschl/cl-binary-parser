@@ -22,14 +22,14 @@
      ((stream obj &key) (nibbles:write-sb32/be obj stream))))
 
 
-(define-binary-type integer64
-    (((stream &key) (nibbles:read-sb64/be stream))
-     ((stream obj &key) (nibbles:write-sb64/be obj stream))))
-
-
 (define-binary-type unsigned-integer64
     (((stream &key) (nibbles:read-ub64/be stream))
      ((stream obj &key) (nibbles:write-ub64/be obj stream))))
+
+
+(define-binary-type integer64
+    (((stream &key) (nibbles:read-sb64/be stream))
+     ((stream obj &key) (nibbles:write-sb64/be obj stream))))
 
 
 (define-binary-type binary-boolean
