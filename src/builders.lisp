@@ -65,7 +65,9 @@
         (type (intern "TYPE"))
         (object (intern "OBJECT"))
         (stream (intern "STREAM"))
-        (result (intern "RESULT")))
+        (result (intern "RESULT"))
+        (read-value-function (intern "READ-VALUE"))
+        (write-value-function (intern "WRITE-VALUE")))
 
     (labels
         ((slot-specifier (slot)
@@ -79,24 +81,26 @@
                (if (listp slot) slot (list slot))
              (declare (ignore default-value type))
              `(setf (slot-value ,result ',name)
-                    (read-value ',binary-type ,stream))))
+                    (,read-value-function ',binary-type ,stream))))
 
          (slot-writer (slot)
            (destructuring-bind (name default-value &key type binary-type)
                (if (listp slot) slot (list slot))
              (declare (ignore default-value type))
-             `(write-value ',binary-type ,stream (slot-value ,object ',name)))))
+             `(,write-value-function ',binary-type ,stream (slot-value ,object ',name)))))
 
       `(progn
          (defstruct (,(car definition) ,@(cdr definition))
            ,@(mapcar #'slot-specifier slots))
-
-         (defmethod ,(symbolicate "READ-VALUE")
+         (intern "READ-VALUE" :cloudless/libraries/binary-parser)
+         (defmethod ,read-value-function
              ((,type (eql ',(car definition)))  ,stream &key)
            (let ((,result (make-instance ',(car definition))))
              ,@(mapcar #'slot-reader slots)))
 
-         (defmethod ,(symbolicate "WRITE-VALUE")
+
+         (intern "WRITE-VALUE" :cloudless/libraries/binary-parser)
+         (defmethod ,write-value-function
              ((,type (eql ',(car definition)))  ,stream ,object &key)
            (assert (typep ,object ',(car definition)))
            ,@(mapcar #'slot-writer slots))))))
