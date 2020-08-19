@@ -10,6 +10,7 @@ It uses ideas and functions from following projects:
 - [frpc](https://github.com/fjames86/frpc)
 - [nibbles](https://github.com/froydnj/nibbles)
 - [alexandria](https://github.com/keithj/alexandria)
+- [flexi-streams](https://github.com/edicl/flexi-streams)
 
 ## TODOs
 * Test usage of
