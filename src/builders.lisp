@@ -65,13 +65,15 @@
 
 
 (defmacro define-binary-struct (definition &rest slots)
-  (let ((definition (if (listp definition) definition (list definition)))
-        (type (intern "TYPE"))
-        (object (intern "OBJECT"))
-        (stream (intern "STREAM"))
-        (result (intern "RESULT"))
-        (read-value-function (intern "READ-VALUE"))
-        (write-value-function (intern "WRITE-VALUE")))
+  (let* ((definition (if (listp definition) definition (list definition)))
+         (definition-type (intern (symbol-name (car definition))))
+         (definition-type-keyword (intern (symbol-name (car definition)) "KEYWORD"))
+         (type (intern "TYPE"))
+         (object (intern "OBJECT"))
+         (stream (intern "STREAM"))
+         (result (intern "RESULT"))
+         (read-value-function (symbolicate "READ-VALUE"))
+         (write-value-function (symbolicate "WRITE-VALUE")))
 
     (labels
         ((slot-specifier (slot)
