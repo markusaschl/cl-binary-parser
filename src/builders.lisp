@@ -27,7 +27,6 @@
 (defmacro define-binary-type (name ((reader-args &body reader-body)
                                     (writer-args &body writer-body)))
   `(progn
-     (intern (symbol-name ',name))
      (defmethod read-value ((type (eql ,name)) ,@reader-args)
        ,@reader-body)
 
@@ -89,17 +88,15 @@
                (if (listp slot) slot (list slot))
              (declare (ignore default-value type))
              `(setf (slot-value ,result ',name)
-                    (,read-value-function ',binary-type ,stream))))
+                    (,read-value-function ,binary-type ,stream))))
 
          (slot-writer (slot)
            (destructuring-bind (name default-value &key type binary-type)
                (if (listp slot) slot (list slot))
              (declare (ignore default-value type))
-             `(,write-value-function ',binary-type ,stream (slot-value ,object ',name)))))
+             `(,write-value-function ,binary-type ,stream (slot-value ,object ',name)))))
 
       `(progn
-         (import 'cloudless/libraries/binary-parser:read-value)
-         (import 'cloudless/libraries/binary-parser:write-value)
          (defstruct (,definition-type ,@(cdr definition))
            ,@(mapcar #'slot-specifier slots))
 
