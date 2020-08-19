@@ -25,10 +25,11 @@
 (defmacro define-binary-type (name ((reader-args &body reader-body)
                                     (writer-args &body writer-body)))
   `(progn
-     (defmethod read-value ((type (eql ',name)) ,@reader-args)
+     (intern (symbol-name ',name))
+     (defmethod read-value ((type (eql ,name)) ,@reader-args)
        ,@reader-body)
 
-     (defmethod write-value ((type (eql ',name)) ,@writer-args)
+     (defmethod write-value ((type (eql ,name)) ,@writer-args)
        ,@writer-body)))
 
 
@@ -93,19 +94,19 @@
              `(,write-value-function ',binary-type ,stream (slot-value ,object ',name)))))
 
       `(progn
-         (defstruct (,(car definition) ,@(cdr definition))
+         (import 'cloudless/libraries/binary-parser:read-value)
+         (import 'cloudless/libraries/binary-parser:write-value)
+         (defstruct (,definition-type ,@(cdr definition))
            ,@(mapcar #'slot-specifier slots))
-         (intern "READ-VALUE" :cloudless/libraries/binary-parser)
+
          (defmethod ,read-value-function
-             ((,type (eql ',(car definition)))  ,stream &key)
-           (let ((,result (make-instance ',(car definition))))
+             ((,type (eql ,definition-type-keyword))  ,stream &key)
+           (let ((,result (make-instance ',definition-type)))
              ,@(mapcar #'slot-reader slots)))
 
-
-         (intern "WRITE-VALUE" :cloudless/libraries/binary-parser)
          (defmethod ,write-value-function
-             ((,type (eql ',(car definition)))  ,stream ,object &key)
-           (assert (typep ,object ',(car definition)))
+             ((,type (eql ,definition-type-keyword))  ,stream ,object &key)
+           (assert (typep ,object ',definition-type))
            ,@(mapcar #'slot-writer slots))))))
 
 
