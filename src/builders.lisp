@@ -77,22 +77,21 @@
 
     (labels
         ((slot-specifier (slot)
-           (destructuring-bind (name default-value &key type binary-type)
-               (if (listp slot) slot (list slot))
-             (declare (ignore binary-type))
-             `(,name ,default-value ,@(when type `(:type ,type)))))
+           (destructuring-bind (name default-value &rest args)
+               (if (listp slot) slot (list slot nil))
+             `(,name ,default-value ,@(remove-from-plist args :binary-type))))
 
          (slot-reader (slot)
-           (destructuring-bind (name default-value &key type binary-type)
-               (if (listp slot) slot (list slot))
-             (declare (ignore default-value type))
+           (destructuring-bind (name default-value &key binary-type &allow-other-keys)
+               (if (listp slot) slot (list slot nil))
+             (declare (ignore default-value))
              `(setf (slot-value ,result ',name)
                     (,read-value-function ,binary-type ,stream))))
 
          (slot-writer (slot)
-           (destructuring-bind (name default-value &key type binary-type)
-               (if (listp slot) slot (list slot))
-             (declare (ignore default-value type))
+           (destructuring-bind (name default-value &key binary-type &allow-other-keys)
+               (if (listp slot) slot (list slot nil))
+             (declare (ignore default-value))
              `(,write-value-function ,binary-type ,stream (slot-value ,object ',name)))))
 
       `(progn
@@ -100,7 +99,7 @@
            ,@(mapcar #'slot-specifier slots))
 
          (defmethod ,read-value-function
-             ((,type (eql ,definition-type-keyword))  ,stream &key)
+             ((,type (eql ,definition-type-keyword)) ,stream &key)
            (let ((,result (make-instance ',definition-type)))
 
              ,@(mapcar #'slot-reader slots)

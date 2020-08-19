@@ -12,7 +12,7 @@
      (:conc-name message--)
      (:constructor %make-message))
 
-    (signature 0 :type (unsigned-integer 16) :binary-type :unsigned-integer16)
+    (signature 123 :type (unsigned-integer 16) :binary-type :unsigned-integer16 :read-only t)
   (protocol 0 :type (unsigned-integer 16) :binary-type :unsigned-integer16)
   (version 0 :type (unsigned-integer 16) :binary-type :unsigned-integer16)
   (id 0 :type (unsigned-integer 16) :binary-type :unsigned-integer16)

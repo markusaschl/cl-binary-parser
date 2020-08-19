@@ -53,11 +53,13 @@ by STRING-DESIGNATOR being its first argument."
       (read-sequence (loop :for i :below (- 4 m) :collect 0) stream)))
   nil)
 
+
 ;; from frpc
 (defun write-array-padding (stream array-length)
   (let ((m (mod array-length 4)))
     (unless (zerop m)
       (write-sequence (subseq #(0 0 0) 0 (- 4 m)) stream))))
+
 
 ;; from frpc
 (defun pad-index (index)
@@ -65,3 +67,18 @@ by STRING-DESIGNATOR being its first argument."
     (if (zerop m)
         index
         (+ index (- 4 m)))))
+
+
+;; from alexandria
+(defun remove-from-plist (plist &rest keys)
+  "Returns a propery-list with same keys and values as PLIST, except that keys
+in the list designated by KEYS and values corresponding to them are removed. The
+returned property-list may share structure with the PLIST, but PLIST is not
+destructively modified. Keys are compared using EQ."
+  (declare (optimize (speed 3)))
+  ;; FIXME: possible optimization: (remove-from-plist '(:x 0 :a 1 :b 2) :a)
+  ;; could return the tail without consing up a new list.
+  (loop for (key . rest) on plist by #'cddr
+        do (assert rest () "Expected a proper plist, got ~S" plist)
+        unless (member key keys :test #'eq)
+        collect key and collect (first rest)))
