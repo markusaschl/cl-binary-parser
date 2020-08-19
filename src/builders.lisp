@@ -1,5 +1,4 @@
 (in-package :cloudless/libraries/binary-parser)
-(declaim (optimize (debug 3)))
 
 
 (defconstant +max-octet-array-length+ (* 50 1024 1024))
