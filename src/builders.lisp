@@ -18,6 +18,8 @@
 (defgeneric read-value (type stream &key)
   (:documentation "Read from a stream of the given type and parse it into a LISP
   structure."))
+
+
 (defgeneric write-value (type stream value &key)
   (:documentation "Write an object into a stream of the given type."))
 
