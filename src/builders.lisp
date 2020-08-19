@@ -110,23 +110,3 @@
              ((,type (eql ,definition-type-keyword))  ,stream ,object &key)
            (assert (typep ,object ',definition-type))
            ,@(mapcar #'slot-writer slots))))))
-
-
-(defun read-array-padding (stream array-length)
-  (let ((m (mod array-length 4)))
-    (unless (zerop m)
-      (read-sequence (loop :for i :below (- 4 m) :collect 0) stream)))
-  nil)
-
-
-(defun write-array-padding (stream array-length)
-  (let ((m (mod array-length 4)))
-    (unless (zerop m)
-      (write-sequence (subseq #(0 0 0) 0 (- 4 m)) stream))))
-
-
-(defun pad-index (index)
-  (let ((m (mod index 4)))
-    (if (zerop m)
-        index
-        (+ index (- 4 m)))))

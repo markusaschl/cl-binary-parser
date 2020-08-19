@@ -2,6 +2,7 @@
 
 
 
+;; from alexandria
 (defun symbolicate (&rest things)
   "Concatenate together the names of some strings and symbols, producing a
 symbol in the current package."
@@ -16,12 +17,14 @@ symbol in the current package."
           (incf index len))))))
 
 
+;; from alexandria
 (deftype string-designator ()
   "A string designator type. A string designator is either a string, a symbol,
 or a character."
   `(or symbol string character))
 
 
+;; from alexandria
 (defmacro with-gensyms (names &body forms)
   "Binds a set of variables to gensyms and evaluates the implicit progn FORMS.
 
@@ -41,3 +44,24 @@ by STRING-DESIGNATOR being its first argument."
                      `(,symbol (gensym ,string))))
           names)
      ,@forms))
+
+
+;; from frpc
+(defun read-array-padding (stream array-length)
+  (let ((m (mod array-length 4)))
+    (unless (zerop m)
+      (read-sequence (loop :for i :below (- 4 m) :collect 0) stream)))
+  nil)
+
+;; from frpc
+(defun write-array-padding (stream array-length)
+  (let ((m (mod array-length 4)))
+    (unless (zerop m)
+      (write-sequence (subseq #(0 0 0) 0 (- 4 m)) stream))))
+
+;; from frpc
+(defun pad-index (index)
+  (let ((m (mod index 4)))
+    (if (zerop m)
+        index
+        (+ index (- 4 m)))))
