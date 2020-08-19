@@ -44,7 +44,7 @@
                     exists-p))
                 (insert-key-value-into-map (table key value)
                   (if (map-contains-key table key)
-                      (error (format nil "The key \"~s\" would be a duplicate. In an enum those are not allowed." key))
+                      (error "The key \"~s\" would be a duplicate. In an enum those are not allowed." key)
                       (setf (gethash key table) value))))
 
          (defvar ,map-name (make-hash-table))
