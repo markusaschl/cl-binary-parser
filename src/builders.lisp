@@ -1,5 +1,5 @@
 (in-package :cloudless/libraries/binary-parser)
-
+(declaim (optimize (debug 3)))
 
 
 (defconstant +max-octet-array-length+ (* 50 1024 1024))
@@ -103,7 +103,9 @@
          (defmethod ,read-value-function
              ((,type (eql ,definition-type-keyword))  ,stream &key)
            (let ((,result (make-instance ',definition-type)))
-             ,@(mapcar #'slot-reader slots)))
+
+             ,@(mapcar #'slot-reader slots)
+             ,result))
 
          (defmethod ,write-value-function
              ((,type (eql ,definition-type-keyword))  ,stream ,object &key)
