@@ -23,7 +23,6 @@
 (deftype signed-integer (bit-length) `(integer 0 ,(- (expt 2 bit-length) 1)))
 
 
-
 (define-binary-type :unsigned-integer16
     (((stream &key) (nibbles:read-ub16/be stream))
      ((stream obj &key) (nibbles:write-ub16/be obj stream))))
