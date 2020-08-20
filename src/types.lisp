@@ -2,6 +2,31 @@
 
 
 
+(defconstant +max-octet-array-length+ (* 50 1024 1024))
+
+
+(defvar *types* (make-hash-table))
+
+
+(deftype octet () '(unsigned-byte 8))
+
+(deftype octet-vector (&optional (length '*)) `(array octet (,length)))
+
+(deftype unsigned-integer (bit-length)
+  (let ((from 0)
+        (to (- (expt 2 bit-length) 1)))
+    `(integer ,from ,to)))
+
+(deftype signed-integer (bit-length)
+  (let ((range (- (expt 2 bit-length) 1)))
+    (let ((from (* range -1))
+          (to range))
+      `(integer ,from ,to))))
+
+(deftype signed-integer (bit-length) `(integer 0 ,(- (expt 2 bit-length) 1)))
+
+
+
 (define-binary-type :unsigned-integer16
     (((stream &key) (nibbles:read-ub16/be stream))
      ((stream obj &key) (nibbles:write-ub16/be obj stream))))
@@ -81,7 +106,7 @@
            (funcall writer stream (aref array i)))))))
 
 
-(define-binary-type :octet-array
+(define-binary-type (:octet-array octet-vector)
     (((stream &key buffer)
        (let ((len (read-value :unsigned-integer32 stream)))
          (when (> len +max-octet-array-length+)
@@ -113,7 +138,7 @@
     (gethash value (cdr (gethash version map)))))
 
 
-(define-binary-type :binary-enum
+(define-binary-type (:binary-enum symbol)
     (((stream &key enum-type (version 0))
        (get-binary-enum-key enum-type (read-value 'integer32 stream) version))
      ((stream enum-key &key (enum-type (error "enum-type is a required argument.")) (version 0))

@@ -22,11 +22,16 @@
            #:define-binary-struct)
 
   ;; binary types
-  (:export #:unsigned-integer16
-           #:integer16
+  (:export #:+max-octet-array-length+
+           #:octet
+           #:octet-vector
+           #:unsigned-integer
+           #:signed-integer
+           #:unsigned-integer16
            #:unsigned-integer32
-           #:integer32
            #:unsigned-integer64
+           #:integer16
+           #:integer32
            #:integer64
            #:binary-boolean
            #:real32

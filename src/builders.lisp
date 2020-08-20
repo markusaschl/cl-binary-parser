@@ -1,18 +1,6 @@
 (in-package :cloudless/libraries/binary-parser)
 
 
-(defconstant +max-octet-array-length+ (* 50 1024 1024))
-
-
-(deftype octet ()
-  '(unsigned-byte 8))
-
-(deftype octet-vector (&optional (length '*))
-  `(array octet (,length)))
-
-(deftype unsigned-integer (bit-length)
-  `(integer 0 ,(- (expt 2 bit-length) 1)))
-
 
 (defgeneric read-value (type stream &key)
   (:documentation "Read from a stream of the given type and parse it into a LISP
@@ -23,7 +11,7 @@
   (:documentation "Write an object into a stream of the given type."))
 
 
-(defmacro define-binary-type (name ((reader-args &body reader-body)
+(defmacro define-binary-type ((name lisp-name) ((reader-args &body reader-body)
                                     (writer-args &body writer-body)))
   `(progn
      (defmethod read-value ((type (eql ,name)) ,@reader-args)
