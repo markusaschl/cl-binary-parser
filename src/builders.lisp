@@ -11,7 +11,7 @@
   (:documentation "Write an object into a stream of the given type."))
 
 
-(defmacro define-binary-type ((name lisp-name) ((reader-args &body reader-body)
+(defmacro define-binary-type (name ((reader-args &body reader-body)
                                     (writer-args &body writer-body)))
   `(progn
      (defmethod read-value ((type (eql ,name)) ,@reader-args)
