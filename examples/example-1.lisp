@@ -7,21 +7,24 @@
 (in-package :binary-parser/examples)
 
 
+(binary-parser:define-binary-enum protocol (:foo :bar :baz))
+
+
 (binary-parser:define-binary-struct
     (message
      (:conc-name message--)
      (:constructor %make-message))
 
-    (signature 123 :type (unsigned-integer 16) :binary-type :unsigned-integer16 :read-only t)
-  (protocol 0 :type (unsigned-integer 16) :binary-type :unsigned-integer16)
-  (version 0 :type (unsigned-integer 16) :binary-type :unsigned-integer16)
-  (id 0 :type (unsigned-integer 16) :binary-type :unsigned-integer16)
-  (nonce 0 :type (unsigned-integer 64) :binary-type :unsigned-integer64)
-  (chunk (make-array 0 :element-type 'octet) :type (octet-vector *) :binary-type :octet-array))
+    (signature 123 :type (unsigned-integer 16) :read-only t)
+  (protocol :foo :type protocol)
+  (version 0 :type (unsigned-integer 16))
+  (id 0 :type (unsigned-integer 16))
+  (nonce 0 :type (unsigned-integer 64))
+  (chunk (make-array 0 :element-type 'binary-parser:octet) :type octet-vector))
 
 
 (defparameter *message* (%make-message :signature 123
-                                       :protocol 3000
+                                       :protocol :baz
                                        :version 1
                                        :id 435))
 
