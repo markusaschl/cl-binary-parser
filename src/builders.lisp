@@ -2,6 +2,12 @@
 
 
 
+(deftype binary-enum (&rest keys) `(member ,@keys))
+
+
+(defvar *types* (make-hash-table :test 'equalp))
+
+
 (defgeneric read-value (type stream &key)
   (:documentation "Read from a stream of the given type and parse it into a LISP
   structure."))
@@ -11,18 +17,36 @@
   (:documentation "Write an object into a stream of the given type."))
 
 
-(defmacro define-binary-type (name ((reader-args &body reader-body)
-                                    (writer-args &body writer-body)))
-  `(progn
-     (defmethod read-value ((type (eql ,name)) ,@reader-args)
-       ,@reader-body)
+(defmacro define-binary-type ((name . lisp-name) ((reader-args &body reader-body)
+                                                  (writer-args &body writer-body)))
+  (let ((read-value (intern "READ-VALUE"))
+        (write-value (intern "WRITE-VALUE")))
+    `(progn
+       (setf (gethash ',lisp-name *types*) ,name)
+       (defmethod ,read-value ((type (eql ,name)) ,@reader-args)
+         ,@reader-body)
 
-     (defmethod write-value ((type (eql ,name)) ,@writer-args)
-       ,@writer-body)))
+       (defmethod ,write-value ((type (eql ,name)) ,@writer-args)
+         ,@writer-body))))
 
 
-(defmacro define-binary-enum ((name &key (version 0)) slots)
-  (let ((map-name (symbolicate "*GENERATED-" name "-MAP*")))
+(defun get-binary-enum-value (type key)
+  (let ((map (symbol-value
+              (intern (concatenate 'string "*" (symbol-name type) "-MAP*")
+                      :binary-parser/generated))))
+    (gethash key (car map))))
+
+
+(defun get-binary-enum-key (type value)
+  (let ((map (symbol-value
+              (intern (concatenate 'string "*" (symbol-name type) "-MAP*")
+                      :binary-parser/generated))))
+    (gethash value (cdr map))))
+
+
+(defmacro define-binary-enum (name slots)
+  (let ((map-name(intern (concatenate 'string "*" (symbol-name name) "-MAP*")
+                         :binary-parser/generated)))
     (with-gensyms ((enum-map-keys "ENUM-MAP-KEYS-")
                    (enum-map-values "ENUM-MAP-VALUES-"))
 
@@ -35,10 +59,8 @@
                       (error "The key \"~s\" would be a duplicate. In an enum those are not allowed." key)
                       (setf (gethash key table) value))))
 
-         (defvar ,map-name (make-hash-table))
          (let ((,enum-map-keys (make-hash-table))
                (,enum-map-values (make-hash-table)))
-           (declare (special ,map-name))
            ,@(loop for slot in slots
                    with max = -1
                    for key = (if (listp slot) (car slot) slot)
@@ -49,7 +71,16 @@
 
                    collect `(insert-key-value-into-map ,enum-map-keys ,key ,value)
                    collect `(insert-key-value-into-map ,enum-map-values ,value ,key))
-           (setf (gethash ,version ,map-name) (cons ,enum-map-keys ,enum-map-values)))))))
+           (defparameter ,map-name (cons ,enum-map-keys ,enum-map-values))
+
+           (deftype ,name ()
+             `(binary-enum ,@(hash-table-keys ,enum-map-keys)))
+
+           (define-binary-type (,(intern (symbol-name name) "KEYWORD"). ,name )
+               (((stream &key)
+                  (get-binary-enum-key ',name (read-value :unsigned-integer32 stream)))
+                ((stream enum-key &key)
+                  (write-value :unsigned-integer32 stream (get-binary-enum-value ',name enum-key))))))))))
 
 
 (defmacro define-binary-struct (definition &rest slots)
@@ -67,20 +98,21 @@
         ((slot-specifier (slot)
            (destructuring-bind (name default-value &rest args)
                (if (listp slot) slot (list slot nil))
-             `(,name ,default-value ,@(remove-from-plist args :binary-type))))
+             `(,name ,default-value ,@args)))
 
          (slot-reader (slot)
-           (destructuring-bind (name default-value &key binary-type &allow-other-keys)
+           (destructuring-bind (name default-value &key type &allow-other-keys)
                (if (listp slot) slot (list slot nil))
              (declare (ignore default-value))
              `(setf (slot-value ,result ',name)
-                    (,read-value-function ,binary-type ,stream))))
+                    (,read-value-function ,(gethash type *types*) ,stream))))
 
+         
          (slot-writer (slot)
-           (destructuring-bind (name default-value &key binary-type &allow-other-keys)
+           (destructuring-bind (name default-value &key type &allow-other-keys)
                (if (listp slot) slot (list slot nil))
              (declare (ignore default-value))
-             `(,write-value-function ,binary-type ,stream (slot-value ,object ',name)))))
+             `(,write-value-function ,(gethash type *types*) ,stream (slot-value ,object ',name)))))
 
       `(progn
          (defstruct (,definition-type ,@(cdr definition))

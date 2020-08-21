@@ -82,3 +82,22 @@ destructively modified. Keys are compared using EQ."
         do (assert rest () "Expected a proper plist, got ~S" plist)
         unless (member key keys :test #'eq)
         collect key and collect (first rest)))
+
+
+;; from alexandria
+(declaim (inline maphash-keys))
+(defun maphash-keys (function table)
+  "Like MAPHASH, but calls FUNCTION with each key in the hash table TABLE."
+  (maphash (lambda (k v)
+             (declare (ignore v))
+             (funcall function k))
+           table))
+
+;; from alexandria
+(defun hash-table-keys (table)
+  "Returns a list containing the keys of hash table TABLE."
+  (let ((keys nil))
+    (maphash-keys (lambda (k)
+                    (push k keys))
+                  table)
+    keys))

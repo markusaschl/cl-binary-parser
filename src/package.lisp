@@ -41,3 +41,7 @@
            #:fixed-array
            #:octet-array
            #:binary-enum))
+
+
+(uiop:define-package :cloudless/libraries/binary-parser/generated
+  (:nicknames :binary-parser/generated))
