@@ -30,6 +30,7 @@
          ,@writer-body))))
 
 
+(declaim (inline get-binary-enum-value))
 (defun get-binary-enum-value (type key)
   (let ((map (symbol-value
               (intern (concatenate 'string "*" (symbol-name type) "-MAP*")
@@ -37,6 +38,7 @@
     (gethash key (car map))))
 
 
+(declaim (inline get-binary-enum-key))
 (defun get-binary-enum-key (type value)
   (let ((map (symbol-value
               (intern (concatenate 'string "*" (symbol-name type) "-MAP*")
