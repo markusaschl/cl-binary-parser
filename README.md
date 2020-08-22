@@ -14,6 +14,6 @@ It uses ideas and functions from following projects:
 
 ## TODOs
 * Test usage of
-- [] ```binary-enums```
-- [] ```floats and doubles```
-- [] ```binary-strings```
+- [ x ] ```binary-enums```
+- [ ~ ] ```floats and doubles```
+- [ x ] ```binary-strings```
