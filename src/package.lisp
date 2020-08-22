@@ -2,26 +2,15 @@
   (:use :common-lisp)
   (:nicknames :binary-parser)
 
-  ;; constants
-  (:export #:+max-octet-array-length+
-           #:define-binary-struct)
-
-  ;; pure lisp types
-  (:export
-   #:octet
-   #:octet-vector
-   #:unsigned-integer)
-
-  ;; accessors
-  (:export #:read-value
-           #:write-value)
-
-  ;; macros
-  (:export #:define-binary-type
+  ;; builders.lisp
+  (:export #:binary-enum
+           #:read-value
+           #:write-value
+           #:define-binary-type
            #:define-binary-enum
            #:define-binary-struct)
 
-  ;; binary types
+  ;; types.lisp
   (:export #:+max-octet-array-length+
            #:unsigned-integer
            #:signed-integer
