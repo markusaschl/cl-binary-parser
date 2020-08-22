@@ -17,16 +17,18 @@
   (:documentation "Write an object into a stream of the given type."))
 
 
-(defmacro define-binary-type ((name . lisp-name) ((reader-args &body reader-body)
+(defmacro define-binary-type ((name . lisp-spec) ((reader-args &body reader-body)
                                                   (writer-args &body writer-body)))
   (let ((read-value (intern "READ-VALUE"))
         (write-value (intern "WRITE-VALUE")))
     `(progn
-       (setf (gethash ',lisp-name *types*) ,name)
-       (defmethod ,read-value ((type (eql ,name)) ,@reader-args)
+       (deftype ,name () ,lisp-spec)
+
+
+       (defmethod ,read-value ((type (eql ',name)) ,@reader-args)
          ,@reader-body)
 
-       (defmethod ,write-value ((type (eql ,name)) ,@writer-args)
+       (defmethod ,write-value ((type (eql ',name)) ,@writer-args)
          ,@writer-body))))
 
 
@@ -47,7 +49,7 @@
 
 
 (defmacro define-binary-enum (name slots)
-  (let ((map-name(intern (concatenate 'string "*" (symbol-name name) "-MAP*")
+  (let ((map-name (intern (concatenate 'string "*" (symbol-name name) "-MAP*")
                          :binary-parser/generated)))
     (with-gensyms ((enum-map-keys "ENUM-MAP-KEYS-")
                    (enum-map-values "ENUM-MAP-VALUES-"))
@@ -75,14 +77,12 @@
                    collect `(insert-key-value-into-map ,enum-map-values ,value ,key))
            (defparameter ,map-name (cons ,enum-map-keys ,enum-map-values))
 
-           (deftype ,name ()
-             `(binary-enum ,@(hash-table-keys ,enum-map-keys)))
 
-           (define-binary-type (,(intern (symbol-name name) "KEYWORD"). ,name )
+           (define-binary-type (,name . `(binary-enum ,@(hash-table-keys ,enum-map-keys)))
                (((stream &key)
-                  (get-binary-enum-key ',name (read-value :unsigned-integer32 stream)))
+                  (get-binary-enum-key ',name (read-value 'unsigned-integer-32 stream)))
                 ((stream enum-key &key)
-                  (write-value :unsigned-integer32 stream (get-binary-enum-value ',name enum-key))))))))))
+                  (write-value 'unsigned-integer-32 stream (get-binary-enum-value ',name enum-key))))))))))
 
 
 (defmacro define-binary-struct (definition &rest slots)
@@ -107,14 +107,14 @@
                (if (listp slot) slot (list slot nil))
              (declare (ignore default-value))
              `(setf (slot-value ,result ',name)
-                    (,read-value-function ,(gethash type *types*) ,stream))))
+                    (,read-value-function ',type ,stream))))
 
          
          (slot-writer (slot)
            (destructuring-bind (name default-value &key type &allow-other-keys)
                (if (listp slot) slot (list slot nil))
              (declare (ignore default-value))
-             `(,write-value-function ,(gethash type *types*) ,stream (slot-value ,object ',name)))))
+             `(,write-value-function ',type ,stream (slot-value ,object ',name)))))
 
       `(progn
          (defstruct (,definition-type ,@(cdr definition))
