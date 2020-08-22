@@ -68,7 +68,7 @@
            ,@(loop for slot in slots
                    with max = -1
                    for key = (if (listp slot) (car slot) slot)
-                   for value integer = (or (and (listp slot) (cadr slot)) (+ 1 max))
+                   for value integer = (or (and (listp slot) (cdr slot)) (+ 1 max))
                    if (< max value)
                      do (setf max value)
                    end

@@ -7,7 +7,7 @@
 (in-package :binary-parser/examples)
 
 
-(binary-parser:define-binary-enum protocol (:foo (:bar 3000) :baz))
+(binary-parser:define-binary-enum protocol (:foo (:bar . 3000) :baz))
 
 
 (binary-parser:define-binary-struct
