@@ -5,9 +5,6 @@
 (deftype binary-enum (&rest keys) `(member ,@keys))
 
 
-(defvar *types* (make-hash-table :test 'equalp))
-
-
 (defgeneric read-value (type stream &key)
   (:documentation "Read from a stream of the given type and parse it into a LISP
   structure."))
