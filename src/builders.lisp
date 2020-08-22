@@ -88,7 +88,6 @@
 (defmacro define-binary-struct (definition &rest slots)
   (let* ((definition (if (listp definition) definition (list definition)))
          (definition-type (intern (symbol-name (car definition))))
-         (definition-type-keyword (intern (symbol-name (car definition)) "KEYWORD"))
          (type (intern "TYPE"))
          (object (intern "OBJECT"))
          (stream (intern "STREAM"))
@@ -121,13 +120,13 @@
            ,@(mapcar #'slot-specifier slots))
 
          (defmethod ,read-value-function
-             ((,type (eql ,definition-type-keyword)) ,stream &key)
+             ((,type (eql ',definition-type)) ,stream &key)
            (let ((,result (make-instance ',definition-type)))
 
              ,@(mapcar #'slot-reader slots)
              ,result))
 
          (defmethod ,write-value-function
-             ((,type (eql ,definition-type-keyword))  ,stream ,object &key)
+             ((,type (eql ',definition-type))  ,stream ,object &key)
            (assert (typep ,object ',definition-type))
            ,@(mapcar #'slot-writer slots))))))
