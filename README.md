@@ -17,3 +17,8 @@ It uses ideas and functions from following projects:
 - [ x ] ```binary-enums```
 - [ ~ ] ```floats and doubles```
 - [ x ] ```binary-strings```
+
+
+
+
+For a similar project, see [lisp-binary](https://github.com/j3pic/lisp-binary).
