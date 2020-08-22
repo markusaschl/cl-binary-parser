@@ -78,7 +78,7 @@
            (defparameter ,map-name (cons ,enum-map-keys ,enum-map-values))
 
 
-           (define-binary-type (,name . `(binary-enum ,@(hash-table-keys ,enum-map-keys)))
+           (define-binary-type (,name . `(binary-enum ,@(reverse (hash-table-keys ,enum-map-keys))))
                (((stream &key)
                   (get-binary-enum-key ',name (read-value 'unsigned-integer-32 stream)))
                 ((stream enum-key &key)
